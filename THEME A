@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Physics Definition Flashcards</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --card: #191922;
+      --card-2: #242432;
+      --text: #f5f5f5;
+      --muted: #b8b8c8;
+      --accent: #8b3f91;
+      --accent-light: #c875d0;
+      --border: #343449;
+      --success: #77d68a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at top, #232334 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 760px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 12px;
+      margin: 18px 0 16px;
+    }
+
+    input, select, button {
+      font: inherit;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #12121a;
+      color: var(--text);
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent-light);
+      box-shadow: 0 0 0 3px rgba(200,117,208,0.15);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 12px 0 22px;
+    }
+
+    button {
+      cursor: pointer;
+      background: var(--card-2);
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent-light);
+      background: #2c2c3d;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent-light);
+      font-weight: 700;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      padding: 8px 10px;
+      border-radius: 999px;
+    }
+
+    .flashcard-wrap {
+      perspective: 1200px;
+      min-height: 360px;
+    }
+
+    .flashcard {
+      width: 100%;
+      min-height: 360px;
+      border-radius: 28px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.55s ease;
+      cursor: pointer;
+    }
+
+    .flashcard.flipped { transform: rotateY(180deg); }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      padding: clamp(24px, 5vw, 48px);
+      border-radius: 28px;
+      background: linear-gradient(145deg, var(--card), #111119);
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .back { transform: rotateY(180deg); }
+
+    .tag {
+      color: var(--accent-light);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.78rem;
+    }
+
+    .term {
+      font-size: clamp(2.2rem, 7vw, 5rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      font-weight: 800;
+    }
+
+    .definition {
+      font-size: clamp(1.35rem, 3vw, 2.15rem);
+      line-height: 1.25;
+      letter-spacing: -0.025em;
+    }
+
+    .extra {
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 1rem;
+      border-left: 4px solid var(--accent);
+      padding-left: 14px;
+    }
+
+    .nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .list {
+      margin-top: 28px;
+      display: grid;
+      gap: 10px;
+    }
+
+    details {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px 14px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--accent-light);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .mini-card {
+      background: #111119;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .mini-card strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 700px) {
+      body { padding: 14px; }
+      .controls { grid-template-columns: 1fr; }
+      .nav { grid-template-columns: 1fr; }
+      .flashcard, .flashcard-wrap { min-height: 430px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Physics Definition Flashcards</h1>
+      <p class="subtitle">Click the card to reveal the definition. Use search or topic filters to revise a smaller set. Each term from multi-definition images is separated into its own card.</p>
+    </header>
+
+    <section class="controls">
+      <input id="search" type="search" placeholder="Search term or definition..." />
+      <select id="category"></select>
+    </section>
+
+    <section class="button-row">
+      <button class="primary" id="shuffleBtn">Shuffle deck</button>
+      <button id="flipBtn">Flip card</button>
+      <button id="resetBtn">Reset progress</button>
+    </section>
+
+    <section class="stats">
+      <span class="pill" id="countPill">0 cards</span>
+      <span class="pill" id="positionPill">Card 1 of 1</span>
+      <span class="pill" id="categoryPill">All topics</span>
+    </section>
+
+    <section class="flashcard-wrap" aria-live="polite">
+      <article class="flashcard" id="card">
+        <div class="face front">
+          <div class="tag" id="frontTag">Term</div>
+          <div class="term" id="term">Loading...</div>
+          <div class="extra">Click to reveal the definition.</div>
+        </div>
+        <div class="face back">
+          <div class="tag" id="backTag">Definition</div>
+          <div class="definition" id="definition">Loading...</div>
+          <div class="extra" id="tip"></div>
+        </div>
+      </article>
+    </section>
+
+    <nav class="nav">
+      <button id="prevBtn">Previous</button>
+      <button id="knowBtn">Mark as known</button>
+      <button id="nextBtn">Next</button>
+    </nav>
+
+    <section class="list">
+      <details>
+        <summary>Show all cards in current filtered deck</summary>
+        <div class="mini-grid" id="miniGrid"></div>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    const flashcards = [
+      // Kinematics and measurement
+      {term:"Kinematics", definition:"Study of motion.", category:"Kinematics"},
+      {term:"Classical physics", definition:"Physics theories that pre-dated the paradigm shifts introduced by quantum physics and relativity.", category:"General physics"},
+      {term:"Uniform", definition:"Unchanging.", category:"General physics"},
+      {term:"Magnitude", definition:"Size.", category:"General physics"},
+      {term:"Scalars", definition:"Quantities that have only magnitude and no direction.", category:"Vectors"},
+      {term:"Vector", definition:"A quantity that has both magnitude and direction.", category:"Vectors"},
+      {term:"Distance", definition:"Total length travelled, without consideration of direction.", category:"Kinematics"},
+      {term:"Displacement, linear", definition:"Distance in a straight line from a fixed reference point in a specified direction.", category:"Kinematics"},
+      {term:"Metre, m", definition:"SI unit of length; a fundamental unit.", category:"Units"},
+      {term:"Speed, v", definition:"Average speed is distance travelled divided by time taken. Instantaneous speed is determined over a very short time interval during which speed is assumed not to change.", category:"Kinematics"},
+      {term:"Reaction time", definition:"The time delay between an event occurring and a response, for example the delay when using a stopwatch.", category:"Measurement"},
+      {term:"Sensor", definition:"An electrical component that responds to a change in a physical property with a corresponding change in an electrical property, usually resistance. Also called a transducer.", category:"Measurement"},
+      {term:"Light gate", definition:"Electronic sensor used to detect motion when an object interrupts a beam of light.", category:"Measurement"},
+      {term:"Second, s", definition:"SI unit of time; a fundamental unit.", category:"Units"},
+      {term:"At rest", definition:"Stays stationary in the same position.", category:"Kinematics"},
+      {term:"Milky Way", definition:"The galaxy in which our Solar System is located.", category:"Astronomy"},
+      {term:"Velocity, v", definition:"Rate of change of position.", category:"Kinematics"},
+      {term:"Orbit", definition:"The curved path, which may be circular, of a mass around a larger central mass.", category:"Astronomy"},
+      {term:"Tangent", definition:"Line which touches a given curve at a single point.", category:"Graphs and maths"},
+      {term:"Acceleration, a", definition:"Rate of change of velocity with time. Acceleration is a vector quantity.", category:"Kinematics"},
+      {term:"Deceleration", definition:"Term commonly used to describe a decreasing speed.", category:"Kinematics"},
+      {term:"Linear relationship", definition:"One which produces a straight-line graph.", category:"Graphs and maths"},
+      {term:"Gradient", definition:"The rate at which one physical quantity changes in response to changes in another physical quantity. For a y-x graph, gradient = Δy / Δx.", category:"Graphs and maths"},
+      {term:"Integration", definition:"Mathematical process used to determine the area under a graph.", category:"Graphs and maths"},
+      {term:"Spreadsheet", definition:"Electronic document in which data is arranged in rows and columns of a grid, and can be manipulated and used in calculations.", category:"Data handling"},
+      {term:"Calculus", definition:"Branch of mathematics which deals with continuous change.", category:"Graphs and maths"},
+      {term:"Differentiate", definition:"Mathematically determine an equation for a rate of change.", category:"Graphs and maths"},
+      {term:"Equations of motion", definition:"Equations that can be used to make calculations about objects moving with uniform acceleration.", category:"Kinematics"},
+      {term:"Air resistance", definition:"Resistive force opposing the motion of an object through air. A type of drag force.", category:"Forces"},
+      {term:"Acceleration due to gravity, g", definition:"Acceleration of a mass falling freely towards Earth. Near Earth's surface, g = 9.8 m s⁻², often approximated as 10 m s⁻². Also called acceleration of free fall.", category:"Forces"},
+      {term:"Free fall", definition:"Motion through the air under the effects of gravity but without air resistance.", category:"Forces"},
+      {term:"Negligible", definition:"Too small to be significant.", category:"General physics"},
+      {term:"Projectile", definition:"An object projected through the air which then moves only under the action of gravity and air resistance.", category:"Projectiles"},
+      {term:"Resolve a vector", definition:"To express a single vector as components, usually two components that are perpendicular to each other.", category:"Vectors"},
+      {term:"Stroboscope", definition:"Apparatus used for observing rapid motions. It produces regular flashes of light at an appropriate frequency chosen by the user.", category:"Measurement"},
+      {term:"Trajectory", definition:"Path followed by a projectile.", category:"Projectiles"},
+      {term:"Parabolic", definition:"In the shape of a parabola. The trajectory of a projectile is parabolic in a gravitational field if air resistance is negligible.", category:"Projectiles"},
+      {term:"Range of a projectile", definition:"Horizontal distance travelled before impact with the ground.", category:"Projectiles"},
+      {term:"Impact", definition:"Collision involving relatively large forces over a short time.", category:"Momentum"},
+      {term:"Imagination", definition:"Formation of new ideas that are not related to direct sense perception or experimental results.", category:"Nature of science"},
+      {term:"Intuition", definition:"Immediate understanding, without reasoning.", category:"Nature of science"},
+      {term:"Inspiration", definition:"Stimulation, usually to be creative.", category:"Nature of science"},
+
+      // Fluids, drag, forces, fields
+      {term:"Drag", definition:"Force or forces opposing motion through a fluid; sometimes called fluid resistance.", category:"Fluids"},
+      {term:"Fluid", definition:"Liquid or gas.", category:"Fluids"},
+      {term:"Fluid resistance", definition:"Force or forces opposing motion through a fluid; sometimes called drag.", category:"Fluids"},
+      {term:"Terminal speed", definition:"The greatest downward speed of a falling object experiencing resistive forces such as air resistance. It occurs when the object's weight is equal to the sum of the resistive forces plus upthrust.", category:"Fluids"},
+      {term:"Video analysis", definition:"Analysis of motion by freeze-frame or slow-motion video replay.", category:"Measurement"},
+      {term:"Thought experiment", definition:"An experiment carried out in the mind rather than actually being done, normally because it is otherwise impossible.", category:"Nature of science"},
+      {term:"Interaction", definition:"Any event in which two or more objects exert forces on each other.", category:"Forces"},
+      {term:"Newton, N", definition:"Derived SI unit of force. 1 N = 1 kg m s⁻².", category:"Units"},
+      {term:"Mass", definition:"A measure of an object's resistance to a change of motion, or inertia.", category:"Forces"},
+      {term:"Kilogramme, kg", definition:"SI unit of mass; a fundamental unit.", category:"Units"},
+      {term:"Weight, Fg", definition:"Gravitational force acting on a mass. Fg = mg.", category:"Forces"},
+      {term:"Gravitational field strength, g", definition:"The gravitational force per unit mass that would be experienced by a small test mass placed at that point. g = Fg / m. SI unit: N kg⁻¹. Numerically equal to the acceleration due to gravity.", category:"Forces"},
+      {term:"Centre of mass", definition:"Average position of all the mass of an object. The mass is distributed evenly either side of any plane through its centre of mass.", category:"Forces"},
+      {term:"Force meter", definition:"Instrument used to measure forces. Also sometimes called a newton meter or spring balance.", category:"Measurement"},
+      {term:"Calibrate", definition:"Put numbered divisions on a scale.", category:"Measurement"},
+      {term:"Weigh", definition:"Determine the weight of an object. In everyday use, 'weighing' usually means quoting the result as the equivalent mass.", category:"Measurement"},
+      {term:"Peer review", definition:"Evaluation of scientific work by experts in the same field of study.", category:"Nature of science"},
+      {term:"Tension", definition:"Force that tries to stretch an object or material.", category:"Forces"},
+      {term:"Compression", definition:"Force that tries to squash an object or material.", category:"Forces"},
+      {term:"Deformation", definition:"Change of shape.", category:"Materials"},
+      {term:"Normal", definition:"Perpendicular to a surface.", category:"Forces"},
+      {term:"Buoyancy force", definition:"Vertical upward force on an object placed in or on a fluid. Sometimes called upthrust.", category:"Fluids"},
+      {term:"Density", definition:"Mass divided by volume.", category:"Fluids"},
+      {term:"Archimedes' principle", definition:"When an object is wholly or partially immersed in a fluid, it experiences a buoyancy force equal to the weight of the fluid displaced.", category:"Fluids"},
+      {term:"Elastic behaviour", definition:"A material regains its original shape after a force causing deformation has been removed.", category:"Materials"},
+      {term:"Elastic limit", definition:"The maximum force and/or extension that a material or spring can sustain before it becomes permanently deformed.", category:"Materials"},
+      {term:"Extension", definition:"Displacement of the end of an object that is being stretched.", category:"Materials"},
+      {term:"Spring constant, k", definition:"The constant in Hooke's law that represents the stiffness of a spring or other material.", category:"Materials"},
+      {term:"Restoring force", definition:"Force acting in the opposite direction to displacement, returning an object to its equilibrium position.", category:"Materials"},
+      {term:"Interpolate", definition:"Estimate a value within a known data range.", category:"Graphs and maths"},
+      {term:"Extrapolate", definition:"Predict behaviour outside the range of available data.", category:"Graphs and maths"},
+      {term:"Friction", definition:"Resistive forces opposing relative motion. Occurs between solid surfaces, but also with fluids. Static friction prevents movement, whereas dynamic friction occurs when there is already motion.", category:"Forces"},
+      {term:"Coefficient of friction, μ", definition:"Constant used to represent the amount of friction between two different surfaces. It may be static or dynamic.", category:"Forces"},
+      {term:"Constant", definition:"A number assumed to have the same numerical value under a specified range of circumstances.", category:"General physics"},
+      {term:"Fundamental constants", definition:"Numbers assumed to have exactly the same numerical values under all circumstances and all times.", category:"General physics"},
+      {term:"Coefficient", definition:"A multiplying constant placed before a variable, indicating a physical property.", category:"General physics"},
+      {term:"Viscosity", definition:"Resistance of a fluid to movement.", category:"Fluids"},
+      {term:"Viscous drag", definition:"The drag force acting on a moving object due to the viscosity of the fluid through which it is moving.", category:"Fluids"},
+      {term:"Turbulence", definition:"Flow of a fluid which is erratic and unpredictable.", category:"Fluids"},
+      {term:"Stokes' law", definition:"Equation for the viscous drag acting on a smooth, spherical object undergoing non-turbulent motion.", category:"Fluids"},
+      {term:"Streamlined", definition:"Having a shape that reduces the drag forces acting on an object moving through a fluid.", category:"Fluids"},
+      {term:"Field", definition:"A region of space in which a mass, charge, or current experiences a force due to the presence of one or more other masses, charges, or currents.", category:"Fields"},
+      {term:"Free-body diagram", definition:"Diagram showing all the forces acting on a single object, and no other forces.", category:"Forces"},
+      {term:"Point particle, mass or charge", definition:"Theoretical concept used to simplify the discussion of forces acting on objects, especially in gravitational and electric fields.", category:"Fields"},
+      {term:"Resultant force", definition:"The vector sum of the forces acting on an object, sometimes called the unbalanced or net force.", category:"Forces"},
+      {term:"Resultant", definition:"The single vector that has the same effect as the combination of two or more separate vectors.", category:"Vectors"},
+      {term:"Components of a vector", definition:"Any single vector can be considered as having the same effect as two parts, or components, perpendicular to each other.", category:"Vectors"},
+      {term:"Inclined plane", definition:"Flat surface at an angle to the horizontal, but not perpendicular. A simple device that can reduce the force needed to raise a load; sometimes called a ramp.", category:"Forces"},
+      {term:"Newton's laws of motion", definition:"First law: an object remains at rest or continues in a straight line at constant speed unless a resultant force acts on it. Second law: acceleration is proportional to resultant force. Third law: when one body exerts a force on another, the second body exerts an equal and opposite force on the first.", category:"Forces"},
+      {term:"Balanced forces", definition:"If an object is in mechanical equilibrium, the forces acting on it are described as balanced.", category:"Forces"},
+      {term:"Equilibrium", definition:"An object is in equilibrium if it is unchanging under the action of two or more influences such as forces. Types include translational, rotational and thermal equilibrium.", category:"Forces"},
+      {term:"Translational", definition:"Changing position.", category:"Forces"},
+      {term:"Proportional relationship", definition:"Two variables are directly proportional if they always have the same ratio.", category:"Graphs and maths"},
+      {term:"Uncertainty bars", definition:"Vertical and horizontal lines drawn through data points on a graph to represent the uncertainties in the two values.", category:"Measurement"},
+      {term:"Inertia", definition:"Resistance to a change of motion. Depends on the mass of the object.", category:"Forces"},
+      {term:"Momentum, p", definition:"Mass times velocity; a vector quantity.", category:"Momentum"},
+      {term:"System", definition:"The object or objects being considered, and nothing else. An isolated system is a system into which matter and energy cannot flow in or out.", category:"General physics"},
+      {term:"Surroundings", definition:"Everything apart from the system that is being considered; similar to the environment.", category:"General physics"},
+      {term:"Scientific notation", definition:"Every number is expressed in the form a × 10^b, where a is a decimal number larger than 1 and less than 10, and b is an integer exponent.", category:"Measurement"},
+      {term:"Significant figures", definition:"All the digits used in data to carry meaning, whether they are before or after a decimal point.", category:"Measurement"},
+      {term:"Collision", definition:"Two or more objects coming together and exerting forces on each other for a relatively short time.", category:"Momentum"},
+      {term:"Explosion", definition:"Term used in physics to describe when two or more masses, initially at rest, are propelled apart from each other.", category:"Momentum"},
+      {term:"Elastic collision", definition:"A collision in which the total kinetic energy before and after the collision is the same.", category:"Momentum"},
+      {term:"Inelastic collision", definition:"A collision in which the total kinetic energy is reduced after the collision.", category:"Momentum"},
+      {term:"Totally inelastic collision", definition:"A collision in which the objects stick together after colliding.", category:"Momentum"},
+      {term:"Macroscopic", definition:"Can be observed without the need for a microscope.", category:"General physics"},
+      {term:"Microscopic", definition:"Describes anything too small to be seen with the unaided eye.", category:"General physics"},
+      {term:"Recoil", definition:"When a bullet is fired from a gun or similar, the gun gains equal momentum in the opposite direction.", category:"Momentum"},
+      {term:"Propel", definition:"Provide a force for an intended motion.", category:"Momentum"},
+      {term:"Jet engine", definition:"An engine that achieves propulsion by emitting a fast-moving stream of gas or liquid in the opposite direction from the intended motion.", category:"Momentum"},
+      {term:"Rocket engine", definition:"Similar to a jet engine, but there is no air intake. Instead, an oxidant is carried on the vehicle together with the fuel.", category:"Momentum"},
+      {term:"Impulse", definition:"The product of force and the time for which the force acts.", category:"Momentum"},
+      {term:"Centripetal force", definition:"The name given to any force which results in motion along a circular path.", category:"Circular motion"},
+      {term:"Banked track", definition:"A sloping surface to enable faster motion around curves.", category:"Circular motion"},
+      {term:"Centripetal acceleration", definition:"The constantly changing velocity of an object moving along a circular path is equivalent to an acceleration towards the centre of the circle.", category:"Circular motion"},
+      {term:"Radians", definition:"Unit of measurement of angle. There are 2π radians in 360°.", category:"Circular motion"},
+      {term:"Time period, T", definition:"The duration of an event that occurs regularly. T = 1/f.", category:"Circular motion"},
+      {term:"Frequency, f", definition:"The number of repeating events per unit time.", category:"Circular motion"},
+      {term:"Hertz, Hz", definition:"Derived SI unit of frequency. 1 Hz = one event per second.", category:"Units"},
+      {term:"Angular velocity, ω", definition:"Change of angle divided by change of time. Sometimes called angular speed.", category:"Circular motion"},
+
+      // Work, energy, power, uncertainty, rotation
+      {term:"Work, W", definition:"The energy transfer that occurs when an object is moved with a force. More precisely, work done = force × displacement in the direction of the force.", category:"Energy"},
+      {term:"Energy", definition:"Ability to do work.", category:"Energy"},
+      {term:"Joule, J", definition:"Derived SI unit of work and energy. 1 J = 1 N m.", category:"Units"},
+      {term:"Abstract concept", definition:"An idea which has no physical form.", category:"General physics"},
+      {term:"Subjective", definition:"Describes an opinion based on personal experiences and emotions. Compare with objective, meaning free from emotion and bias.", category:"Nature of science"},
+      {term:"Potential energy", definition:"Energy that arises because of forces between different parts of the system. Sometimes described as stored energy.", category:"Energy"},
+      {term:"Gravitational potential energy", definition:"Energy that masses have because of the gravitational forces between them.", category:"Energy"},
+      {term:"Electric potential energy", definition:"Energy that charges have because of the electric forces between them.", category:"Energy"},
+      {term:"Elastic potential energy", definition:"Energy stored in a material that has been deformed elastically.", category:"Energy"},
+      {term:"Chemical potential energy", definition:"Energy related to the arrangement of electrons within the structure of atoms and molecules.", category:"Energy"},
+      {term:"Nuclear potential energy", definition:"Energy related to the forces between particles in the centres, or nuclei, of atoms.", category:"Energy"},
+      {term:"Kinetic energy", definition:"Energy of moving masses.", category:"Energy"},
+      {term:"Thermal energy", definition:"The non-mechanical transfer of energy between two or more bodies at different temperatures, from hotter to colder.", category:"Energy"},
+      {term:"Electrical energy", definition:"Energy delivered in a circuit by an electrical current.", category:"Energy"},
+      {term:"Radiation energy", definition:"Energy transferred by electromagnetic waves.", category:"Energy"},
+      {term:"Internal energy", definition:"Total potential energies and random kinetic energies of the particles in a substance.", category:"Energy"},
+      {term:"Conservation laws", definition:"In isolated systems, some physical quantities remain constant under all circumstances, such as energy, mass, charge and momentum.", category:"Energy"},
+      {term:"Dissipated or degraded energy", definition:"Energy that has spread into the surroundings and cannot be recovered to do useful work.", category:"Energy"},
+      {term:"Sankey diagram", definition:"Diagram representing the flow of energy in a system.", category:"Energy"},
+      {term:"Mechanical energy", definition:"Energy of a macroscopic object which can do useful work.", category:"Energy"},
+      {term:"Order of magnitude", definition:"An approximate value rounded to the nearest power of ten.", category:"Measurement"},
+      {term:"Uncertainty", definition:"The range above and below a stated value over which repeated measurements would be expected to occur. Uncertainty can be expressed in absolute, fractional or percentage terms.", category:"Measurement"},
+      {term:"Accuracy", definition:"A measurement is accurate if it is close to the correct result. A series of measurements is accurate if their mean is close to the correct result.", category:"Measurement"},
+      {term:"Error", definition:"When a measurement is not the same as the correct value.", category:"Measurement"},
+      {term:"Systematic error", definition:"An error which is always either bigger or smaller than the correct value by the same amount, for example a zero-offset error.", category:"Measurement"},
+      {term:"Zero offset error", definition:"A measuring instrument has a zero offset error if it records a non-zero reading when it should be zero.", category:"Measurement"},
+      {term:"Precision", definition:"A measurement is precise if a similar result would be obtained when the measurement is repeated.", category:"Measurement"},
+      {term:"Hydroelectric power", definition:"The generation of electrical power from falling water.", category:"Energy"},
+      {term:"Lever", definition:"A simple machine consisting of a rigid bar and a pivot. Used to change the direction and magnitude of a force.", category:"Machines"},
+      {term:"Pulley", definition:"A rotating wheel used to change the direction of a force. When two or more pulleys are combined, the system can reduce the force needed to do work.", category:"Machines"},
+      {term:"Conservative force", definition:"A force whose action conserves mechanical energy. There is no energy dissipation.", category:"Energy"},
+      {term:"Regenerative braking", definition:"Decelerating a vehicle by transferring kinetic energy into a form that can be used later, rather than dissipating the energy into the surroundings; for example, generating current to charge a battery.", category:"Energy"},
+      {term:"Power, P", definition:"Energy transferred divided by time taken; for mechanical energies, work done divided by time taken.", category:"Energy"},
+      {term:"Watt, W", definition:"Derived SI unit of power. 1 W = 1 J s⁻¹.", category:"Units"},
+      {term:"Resistive force, F", definition:"Any force that opposes motion, for example friction, air resistance or drag.", category:"Forces"},
+      {term:"Efficiency, η", definition:"Ratio of useful energy or power output to total energy or power input.", category:"Energy"},
+      {term:"Energy density", definition:"Energy transferred from unit volume of fuel. SI unit: J m⁻³.", category:"Energy"},
+      {term:"Specific energy", definition:"Amount of energy that can be transferred from unit mass of an energy source. SI unit: J kg⁻¹.", category:"Energy"},
+      {term:"Dynamics", definition:"The science which explains the motion of objects.", category:"Rotational dynamics"},
+      {term:"Rotate", definition:"To move around a central point or axis, usually inside the rotating object.", category:"Rotational dynamics"},
+      {term:"Revolve", definition:"To move around a central point or axis, usually outside the revolving object.", category:"Rotational dynamics"},
+      {term:"Rigid", definition:"Does not change shape.", category:"Rotational dynamics"},
+      {term:"Extended object", definition:"An object that has dimensions; not a point.", category:"Rotational dynamics"},
+      {term:"Axis of rotation", definition:"Line about which an object can rotate.", category:"Rotational dynamics"},
+      {term:"Rotational dynamics", definition:"Branch of physics and engineering that deals with rotating objects.", category:"Rotational dynamics"},
+      {term:"Analogy", definition:"Applying knowledge of one subject to another because of some similarities.", category:"General physics"}
+    ];
+
+    const extraTips = {
+      "Speed, v":"Tip: speed is scalar; velocity is vector. Misconception: speed and velocity are not always interchangeable.",
+      "Velocity, v":"Tip: always include direction when describing velocity.",
+      "Acceleration, a":"Tip: acceleration can occur when speed changes, direction changes, or both.",
+      "Distance":"Tip: distance has no direction, so it is scalar.",
+      "Displacement, linear":"Tip: displacement needs a reference point and a direction.",
+      "Scalars":"Examples: speed, distance, mass, energy, time.",
+      "Vector":"Examples: velocity, displacement, force, acceleration, momentum.",
+      "Gradient":"Tip: in physics, the gradient often represents a meaningful quantity, such as velocity on a displacement-time graph.",
+      "Integration":"Tip: area under a velocity-time graph gives displacement.",
+      "Free fall":"Misconception: free fall does not mean falling in air with air resistance; ideal free fall ignores air resistance.",
+      "Weight, Fg":"Tip: mass is measured in kg; weight is a force measured in N.",
+      "Mass":"Misconception: mass and weight are not the same quantity.",
+      "Resultant force":"Tip: if resultant force is zero, acceleration is zero, but the object may still move at constant velocity.",
+      "Balanced forces":"Misconception: balanced forces do not necessarily mean the object is at rest.",
+      "Inertia":"Tip: greater mass means greater inertia.",
+      "Momentum, p":"Tip: momentum is conserved in isolated systems.",
+      "Impulse":"Tip: impulse is also equal to change in momentum.",
+      "Centripetal force":"Misconception: this is not a new type of force; it is the resultant force towards the centre.",
+      "Work, W":"Tip: only the component of force in the direction of displacement does work.",
+      "Power, P":"Tip: power is the rate of energy transfer, not the total energy transferred.",
+      "Efficiency, η":"Misconception: efficiency cannot be greater than 100%.",
+      "Accuracy":"Tip: accuracy is closeness to the true value.",
+      "Precision":"Tip: precision is repeatability, not necessarily correctness.",
+      "Systematic error":"Tip: repeated measurements do not remove systematic error.",
+      "Uncertainty":"Tip: quote uncertainty with units, or as percentage uncertainty when comparing relative size.",
+      "Terminal speed":"Tip: terminal speed happens when forces are balanced, so acceleration is zero.",
+      "Archimedes' principle":"Tip: compare the object's weight with upthrust to predict sinking or floating.",
+      "Elastic limit":"Tip: beyond this point, deformation becomes permanent.",
+      "Spring constant, k":"Tip: larger k means a stiffer spring.",
+      "Density":"Tip: density depends on both mass and volume.",
+      "Energy":"Tip: energy is transferred or transformed, not used up.",
+      "Dissipated or degraded energy":"Misconception: energy is not destroyed; it becomes less useful for doing work."
+    };
+
+    let filtered = [...flashcards];
+    let index = 0;
+    let known = new Set();
+
+    const card = document.getElementById('card');
+    const termEl = document.getElementById('term');
+    const definitionEl = document.getElementById('definition');
+    const tipEl = document.getElementById('tip');
+    const searchEl = document.getElementById('search');
+    const categoryEl = document.getElementById('category');
+    const countPill = document.getElementById('countPill');
+    const positionPill = document.getElementById('positionPill');
+    const categoryPill = document.getElementById('categoryPill');
+    const miniGrid = document.getElementById('miniGrid');
+
+    function setupCategories() {
+      const categories = ['All topics', ...Array.from(new Set(flashcards.map(c => c.category))).sort()];
+      categoryEl.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function render() {
+      if (!filtered.length) {
+        termEl.textContent = 'No cards found';
+        definitionEl.textContent = 'Try changing your search or category filter.';
+        tipEl.textContent = '';
+        countPill.textContent = '0 cards';
+        positionPill.textContent = 'No card selected';
+        miniGrid.innerHTML = '';
+        return;
+      }
+
+      index = Math.max(0, Math.min(index, filtered.length - 1));
+      const current = filtered[index];
+      card.classList.remove('flipped');
+      termEl.textContent = current.term;
+      definitionEl.textContent = current.definition;
+      tipEl.textContent = extraTips[current.term] || 'Tip: say the definition aloud, then check whether you used the key scientific words.';
+      countPill.textContent = `${filtered.length} cards`;
+      positionPill.textContent = `Card ${index + 1} of ${filtered.length}`;
+      categoryPill.textContent = categoryEl.value;
+      renderMiniGrid();
+    }
+
+    function renderMiniGrid() {
+      miniGrid.innerHTML = filtered.map((c, i) => `
+        <button class="mini-card" onclick="jumpTo(${i})">
+          <strong>${i + 1}. ${c.term}</strong>
+          ${c.category}
+        </button>
+      `).join('');
+    }
+
+    function applyFilters() {
+      const query = searchEl.value.trim().toLowerCase();
+      const category = categoryEl.value;
+      filtered = flashcards.filter(c => {
+        const matchesQuery = !query || c.term.toLowerCase().includes(query) || c.definition.toLowerCase().includes(query);
+        const matchesCategory = category === 'All topics' || c.category === category;
+        return matchesQuery && matchesCategory;
+      });
+      index = 0;
+      render();
+    }
+
+    function shuffleDeck() {
+      for (let i = filtered.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+      }
+      index = 0;
+      render();
+    }
+
+    function nextCard() {
+      if (!filtered.length) return;
+      index = (index + 1) % filtered.length;
+      render();
+    }
+
+    function prevCard() {
+      if (!filtered.length) return;
+      index = (index - 1 + filtered.length) % filtered.length;
+      render();
+    }
+
+    function jumpTo(i) {
+      index = i;
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function markKnown() {
+      if (!filtered.length) return;
+      known.add(filtered[index].term);
+      document.getElementById('knowBtn').textContent = `Known: ${known.size}`;
+      nextCard();
+    }
+
+    function resetProgress() {
+      known.clear();
+      document.getElementById('knowBtn').textContent = 'Mark as known';
+      index = 0;
+      render();
+    }
+
+    card.addEventListener('click', () => card.classList.toggle('flipped'));
+    document.getElementById('flipBtn').addEventListener('click', () => card.classList.toggle('flipped'));
+    document.getElementById('shuffleBtn').addEventListener('click', shuffleDeck);
+    document.getElementById('nextBtn').addEventListener('click', nextCard);
+    document.getElementById('prevBtn').addEventListener('click', prevCard);
+    document.getElementById('knowBtn').addEventListener('click', markKnown);
+    document.getElementById('resetBtn').addEventListener('click', resetProgress);
+    searchEl.addEventListener('input', applyFilters);
+    categoryEl.addEventListener('change', applyFilters);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextCard();
+      if (e.key === 'ArrowLeft') prevCard();
+      if (e.key === ' ') {
+        e.preventDefault();
+        card.classList.toggle('flipped');
+      }
+    });
+
+    setupCategories();
+    render();
+  </script>
+</body>
+</html>
