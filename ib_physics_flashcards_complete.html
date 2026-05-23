@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IB Physics Mechanics Flashcards</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --card-2: #1f2937;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --warning: #f59e0b;
+      --border: rgba(255,255,255,0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .thermo-flashcards {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 24px;
+      background: linear-gradient(135deg, #020617, var(--bg));
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.5rem, 3vw, 2.3rem);
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .score-box {
+      min-width: 130px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      text-align: center;
+    }
+
+    .score-box strong {
+      display: block;
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    button, select {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:hover, select:hover {
+      border-color: var(--accent);
+      background: rgba(56,189,248,0.12);
+    }
+
+    select option {
+      background: #111827;
+      color: white;
+    }
+
+    .progress {
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 22px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.3s ease;
+    }
+
+    .card-scene {
+      perspective: 1200px;
+      min-height: 360px;
+    }
+
+    .flashcard {
+      position: relative;
+      width: 100%;
+      min-height: 360px;
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease;
+      cursor: pointer;
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      padding: clamp(20px, 4vw, 36px);
+      backface-visibility: hidden;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.15), transparent 35%), var(--card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background: radial-gradient(circle at top right, rgba(34,197,94,0.15), transparent 35%), var(--card-2);
+    }
+
+    .tag {
+      align-self: flex-start;
+      font-size: 0.82rem;
+      color: #e0f2fe;
+      background: rgba(56,189,248,0.14);
+      border: 1px solid rgba(56,189,248,0.35);
+      border-radius: 999px;
+      padding: 6px 10px;
+    }
+
+    .question, .answer-title {
+      font-size: clamp(1.6rem, 4vw, 2.7rem);
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+
+    .answer-body {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .equation {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: #fef3c7;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .nav-left, .nav-right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mark-known {
+      color: #dcfce7;
+      border-color: rgba(34,197,94,0.45);
+    }
+
+    .mark-review {
+      color: #ffedd5;
+      border-color: rgba(245,158,11,0.45);
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    @media (max-width: 640px) {
+      .thermo-flashcards {
+        padding: 16px;
+        border-radius: 18px;
+      }
+
+      .header, .navigation {
+        flex-direction: column;
+      }
+
+      .score-box {
+        width: 100%;
+      }
+
+      .nav-left, .nav-right, button, select {
+        width: 100%;
+      }
+
+      button, select {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="thermo-flashcards" aria-label="Interactive IB Physics flashcards">
+    <div class="header">
+      <div>
+        <h2>IB Physics: Space, Time and Motion</h2>
+        <p class="subtitle">Click the card to reveal the explanation. Use the filters and review buttons to practise actively.</p>
+      </div>
+      <div class="score-box" aria-live="polite">
+        <span>Known</span>
+        <strong id="knownScore">0</strong>
+        <span id="totalScore">/ 0</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <select id="categoryFilter" aria-label="Filter flashcards by category">
+        <option value="all">All cards</option>
+        <option value="kinematics">A.1 Kinematics</option>
+        <option value="forces">A.2 Forces & Momentum</option>
+        <option value="energy">A.3 Work, Energy & Power</option>
+        <option value="rotation">A.4 Rigid Body Mechanics</option>
+        <option value="relativity">A.5 Relativity</option>
+        <option value="tips">Tips & Misconceptions</option>
+      </select>
+      <button type="button" id="shuffleBtn">Shuffle</button>
+      <button type="button" id="resetBtn">Reset progress</button>
+    </div>
+
+    <div class="progress" aria-hidden="true">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="card-scene">
+      <article class="flashcard" id="flashcard" tabindex="0" role="button" aria-label="Flashcard. Press enter or space to flip.">
+        <div class="card-face card-front">
+          <span class="tag" id="frontTag">Definition</span>
+          <p class="question" id="questionText">Loading...</p>
+          <span class="hint">Click or press Enter to reveal</span>
+        </div>
+        <div class="card-face card-back">
+          <span class="tag" id="backTag">Answer</span>
+          <div>
+            <p class="answer-title" id="answerTitle">Answer</p>
+            <p class="answer-body" id="answerBody"></p>
+          </div>
+          <div class="equation" id="equationBox"></div>
+          <span class="hint">Click again to return to the question</span>
+        </div>
+      </article>
+    </div>
+
+    <div class="navigation">
+      <div class="nav-left">
+        <button type="button" id="prevBtn">← Previous</button>
+        <button type="button" id="nextBtn">Next →</button>
+      </div>
+      <div class="small" id="cardCounter">Card 1 of 1</div>
+      <div class="nav-right">
+        <button type="button" class="mark-review" id="reviewBtn">Needs review</button>
+        <button type="button" class="mark-known" id="knownBtn">I know this</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const cards = [
+      // A.1 KINEMATICS — CORE CARDS
+      {category:"kinematics", tag:"A.1 Concept", question:"What is the difference between distance and displacement?", title:"Distance vs displacement", body:"Distance is the total path length travelled and is a scalar. Displacement is the change in position from start to finish and is a vector.", equation:"displacement = final position − initial position"},
+      {category:"kinematics", tag:"A.1 Concept", question:"What does velocity represent physically?", title:"Velocity", body:"Velocity is the rate of change of displacement. It includes both magnitude and direction.", equation:"v = Δs / Δt"},
+      {category:"kinematics", tag:"A.1 Concept", question:"What does acceleration represent physically?", title:"Acceleration", body:"Acceleration is the rate of change of velocity. An object accelerates if its speed changes, its direction changes, or both.", equation:"a = Δv / Δt"},
+      {category:"kinematics", tag:"A.1 Skill", question:"When can SUVAT equations be used?", title:"Uniform acceleration only", body:"SUVAT equations apply only when acceleration is constant. They should not be used directly for non-uniform acceleration.", equation:"a = constant"},
+      {category:"kinematics", tag:"A.1 Equation", question:"Which equation links initial velocity, final velocity, acceleration and time?", title:"Velocity equation", body:"This equation is useful when acceleration is constant and time is known.", equation:"v = u + at"},
+      {category:"kinematics", tag:"A.1 Equation", question:"Which equation links displacement and average velocity during uniform acceleration?", title:"Average velocity form", body:"When acceleration is uniform, the average velocity is the mean of initial and final velocities.", equation:"s = ((u + v) / 2)t"},
+      {category:"kinematics", tag:"A.1 Projectile", question:"What is the key feature of horizontal projectile motion without air resistance?", title:"Horizontal motion", body:"Horizontal velocity remains constant because there is no horizontal resultant force and no horizontal acceleration.", equation:"aₓ = 0"},
+      {category:"kinematics", tag:"A.1 Projectile", question:"What controls vertical projectile motion near Earth’s surface?", title:"Vertical motion", body:"The vertical acceleration is approximately constant and directed downward due to gravity.", equation:"aᵧ = −g"},
+      {category:"kinematics", tag:"A.1 Graph", question:"What does the gradient of a velocity–time graph represent?", title:"Gradient of v–t graph", body:"The gradient of a velocity–time graph gives acceleration.", equation:"gradient = acceleration"},
+      {category:"kinematics", tag:"A.1 Graph", question:"What does the area under a velocity–time graph represent?", title:"Area under v–t graph", body:"The area under a velocity–time graph gives displacement, not necessarily distance.", equation:"area = displacement"},
+
+      // A.2 FORCES AND MOMENTUM — CORE CARDS
+      {category:"forces", tag:"A.2 Concept", question:"What does Newton’s first law state?", title:"Newton’s first law", body:"An object remains at rest or moves with constant velocity unless acted on by a resultant external force.", equation:"ΣF = 0 → constant velocity"},
+      {category:"forces", tag:"A.2 Concept", question:"What is Newton’s second law in its most general form?", title:"Newton’s second law", body:"The resultant force on a system equals the rate of change of momentum. The familiar F = ma form assumes constant mass.", equation:"F = Δp / Δt"},
+      {category:"forces", tag:"A.2 Concept", question:"What is Newton’s third law?", title:"Newton’s third law", body:"When body A exerts a force on body B, body B exerts an equal and opposite force on body A. The two forces act on different bodies.", equation:"F_AB = −F_BA"},
+      {category:"forces", tag:"A.2 Skill", question:"What should a free-body diagram include?", title:"Free-body diagrams", body:"It should show only the forces acting on the chosen body, with labels and directions. Do not include forces the body exerts on other objects.", equation:""},
+      {category:"forces", tag:"A.2 Concept", question:"What is momentum?", title:"Linear momentum", body:"Momentum is the product of mass and velocity. It is a vector quantity.", equation:"p = mv"},
+      {category:"forces", tag:"A.2 Concept", question:"When is momentum conserved?", title:"Conservation of momentum", body:"Momentum is conserved when the resultant external force on the system is zero or negligible.", equation:"Σp_before = Σp_after"},
+      {category:"forces", tag:"A.2 Concept", question:"What is impulse?", title:"Impulse", body:"Impulse is the change in momentum caused by a resultant force acting over a time interval.", equation:"J = FΔt = Δp"},
+      {category:"forces", tag:"A.2 Collision", question:"What is the difference between elastic and inelastic collisions?", title:"Types of collision", body:"In elastic collisions, kinetic energy is conserved. In inelastic collisions, total momentum is conserved but kinetic energy is not.", equation:""},
+      {category:"forces", tag:"A.2 Circular", question:"Why is an object in uniform circular motion accelerating?", title:"Centripetal acceleration", body:"Even if speed is constant, velocity changes direction continuously, so there is acceleration towards the centre.", equation:"a = v² / r"},
+      {category:"forces", tag:"A.2 Circular", question:"What provides the centripetal force?", title:"Centripetal force", body:"Centripetal force is not a new type of force. It is the resultant inward force provided by tension, friction, gravity, normal force, or another interaction.", equation:"F = mv² / r"},
+
+      // A.3 WORK, ENERGY AND POWER — CORE CARDS
+      {category:"energy", tag:"A.3 Concept", question:"What is the principle of conservation of energy?", title:"Energy conservation", body:"Energy cannot be created or destroyed. It can only be transferred or transformed from one form to another.", equation:"total energy before = total energy after"},
+      {category:"energy", tag:"A.3 Concept", question:"What is work done by a force?", title:"Work done", body:"Work is the energy transferred when a force causes displacement in the direction of the force component.", equation:"W = Fs cosθ"},
+      {category:"energy", tag:"A.3 Concept", question:"What is kinetic energy?", title:"Kinetic energy", body:"Kinetic energy is the energy an object has because of its motion.", equation:"Eₖ = ½mv²"},
+      {category:"energy", tag:"A.3 Concept", question:"What is gravitational potential energy near Earth’s surface?", title:"Gravitational potential energy", body:"It is the energy stored due to an object’s height in a gravitational field close to Earth’s surface.", equation:"ΔEₚ = mgΔh"},
+      {category:"energy", tag:"A.3 Concept", question:"What is elastic potential energy?", title:"Elastic potential energy", body:"Elastic potential energy is stored when a spring or elastic object is stretched or compressed.", equation:"E_H = ½k(Δx)²"},
+      {category:"energy", tag:"A.3 Concept", question:"When is mechanical energy conserved?", title:"Mechanical energy conservation", body:"Mechanical energy is conserved when no non-conservative forces, such as friction or drag, do work on the system.", equation:"Eₖ + Eₚ + E_H = constant"},
+      {category:"energy", tag:"A.3 Concept", question:"What is power?", title:"Power", body:"Power is the rate of doing work or the rate of energy transfer.", equation:"P = ΔW / Δt"},
+      {category:"energy", tag:"A.3 Equation", question:"When can power be written as force multiplied by velocity?", title:"Power from force and velocity", body:"When a force acts in the direction of motion, power can be expressed as force times velocity.", equation:"P = Fv"},
+      {category:"energy", tag:"A.3 Concept", question:"What does efficiency measure?", title:"Efficiency", body:"Efficiency compares useful output energy or power to total input energy or power.", equation:"η = useful output / total input"},
+      {category:"energy", tag:"A.3 Skill", question:"What does a Sankey diagram show?", title:"Sankey diagrams", body:"A Sankey diagram represents energy transfers visually. Wider arrows represent larger amounts of energy.", equation:""},
+
+      // A.4 RIGID BODY MECHANICS — CORE CARDS
+      {category:"rotation", tag:"A.4 HL Concept", question:"What is torque?", title:"Torque", body:"Torque is the turning effect of a force about an axis. It depends on force, distance from the axis, and angle.", equation:"τ = Fr sinθ"},
+      {category:"rotation", tag:"A.4 HL Concept", question:"What condition is required for rotational equilibrium?", title:"Rotational equilibrium", body:"The resultant torque about an axis must be zero. Clockwise and counter-clockwise torques balance.", equation:"Στ = 0"},
+      {category:"rotation", tag:"A.4 HL Concept", question:"What is angular displacement?", title:"Angular displacement", body:"Angular displacement describes the angle through which a body rotates, usually measured in radians.", equation:"θ in radians"},
+      {category:"rotation", tag:"A.4 HL Concept", question:"What is angular velocity?", title:"Angular velocity", body:"Angular velocity is the rate of change of angular displacement.", equation:"ω = Δθ / Δt"},
+      {category:"rotation", tag:"A.4 HL Concept", question:"What is angular acceleration?", title:"Angular acceleration", body:"Angular acceleration is the rate of change of angular velocity.", equation:"α = Δω / Δt"},
+      {category:"rotation", tag:"A.4 HL Concept", question:"What is moment of inertia?", title:"Moment of inertia", body:"Moment of inertia measures resistance to angular acceleration. It depends on both mass and how far the mass is distributed from the axis.", equation:"I = Σmr²"},
+      {category:"rotation", tag:"A.4 HL Equation", question:"What is Newton’s second law for rotation?", title:"Rotational Newton’s second law", body:"The resultant torque on a rigid body equals its moment of inertia multiplied by angular acceleration.", equation:"τ = Iα"},
+      {category:"rotation", tag:"A.4 HL Concept", question:"What is angular momentum?", title:"Angular momentum", body:"Angular momentum is the rotational equivalent of linear momentum for a rotating body.", equation:"L = Iω"},
+      {category:"rotation", tag:"A.4 HL Concept", question:"When is angular momentum conserved?", title:"Conservation of angular momentum", body:"Angular momentum remains constant when there is no resultant external torque.", equation:"Στ = 0 → L constant"},
+      {category:"rotation", tag:"A.4 HL Concept", question:"What is rotational kinetic energy?", title:"Rotational kinetic energy", body:"A rotating body has kinetic energy due to its angular motion.", equation:"Eₖ = ½Iω²"},
+
+      // A.5 GALILEAN AND SPECIAL RELATIVITY — CORE CARDS
+      {category:"relativity", tag:"A.5 HL Concept", question:"What is a reference frame?", title:"Reference frame", body:"A reference frame is a coordinate system from which position, time and motion are measured.", equation:""},
+      {category:"relativity", tag:"A.5 HL Concept", question:"What is an inertial reference frame?", title:"Inertial frame", body:"An inertial frame is non-accelerating. Newton’s laws hold without needing fictitious forces.", equation:""},
+      {category:"relativity", tag:"A.5 HL Concept", question:"What is Galilean relativity?", title:"Galilean relativity", body:"Newton’s laws of motion are the same in all inertial reference frames.", equation:""},
+      {category:"relativity", tag:"A.5 HL Equation", question:"What is the Galilean transformation for position?", title:"Galilean transformation", body:"It relates the position of an event measured in two frames moving at constant relative velocity.", equation:"x′ = x − vt"},
+      {category:"relativity", tag:"A.5 HL Equation", question:"What is the Galilean velocity transformation?", title:"Velocity transformation", body:"Velocities add or subtract directly in Galilean relativity.", equation:"u′ = u − v"},
+      {category:"relativity", tag:"A.5 HL Concept", question:"What are the two postulates of special relativity?", title:"Einstein’s postulates", body:"The laws of physics are the same in all inertial frames, and the speed of light in vacuum is constant for all inertial observers.", equation:"c = constant"},
+      {category:"relativity", tag:"A.5 HL Concept", question:"What is time dilation?", title:"Time dilation", body:"A moving clock is measured to run slower relative to an observer’s frame.", equation:"Δt = γΔt₀"},
+      {category:"relativity", tag:"A.5 HL Concept", question:"What is length contraction?", title:"Length contraction", body:"An object moving relative to an observer is measured to be shorter along the direction of motion.", equation:"L = L₀ / γ"},
+      {category:"relativity", tag:"A.5 HL Concept", question:"What is the Lorentz factor?", title:"Lorentz factor", body:"The Lorentz factor determines the size of relativistic effects. It becomes significant as speed approaches the speed of light.", equation:"γ = 1 / √(1 − v²/c²)"},
+      {category:"relativity", tag:"A.5 HL Concept", question:"What is the invariant spacetime interval?", title:"Spacetime interval", body:"The spacetime interval between two events has the same value for all inertial observers.", equation:"(Δs)² = (cΔt)² − (Δx)²"},
+
+      // TIPS AND MISCONCEPTIONS — CROSS-TOPIC CARDS
+      {category:"tips", tag:"Misconception: Kinematics", question:"If the acceleration is zero, does that mean the object is stationary?", title:"Zero acceleration does not mean zero velocity", body:"No. Zero acceleration means velocity is constant. The object may still be moving at constant speed in a straight line.", equation:"a = 0 → v = constant"},
+      {category:"tips", tag:"Tip: Kinematics", question:"What is the safest way to start a projectile motion problem?", title:"Resolve into components", body:"Separate the motion into horizontal and vertical components. Use constant horizontal velocity and vertical acceleration due to gravity.", equation:"x-direction and y-direction separately"},
+      {category:"tips", tag:"Misconception: Graphs", question:"Does a curved position–time graph always mean a curved path through space?", title:"Graph shape is not path shape", body:"No. A position–time graph shows how position changes with time. Its curve does not necessarily show the object’s physical trajectory.", equation:""},
+      {category:"tips", tag:"Tip: Graphs", question:"How can students avoid confusing gradient and area in motion graphs?", title:"Gradient vs area", body:"Ask what the axes are. Gradient means change in vertical axis divided by change in horizontal axis. Area means vertical quantity multiplied by horizontal quantity.", equation:"gradient = rise/run"},
+      {category:"tips", tag:"Misconception: Forces", question:"Does motion require a force in the direction of motion?", title:"Force is not needed to maintain motion", body:"No. A resultant force is needed to change velocity, not to maintain constant velocity.", equation:"ΣF = 0 → constant velocity"},
+      {category:"tips", tag:"Misconception: Newton’s third law", question:"Why do Newton’s third-law force pairs not cancel each other?", title:"They act on different bodies", body:"Third-law pairs are equal and opposite but act on different objects, so they cannot cancel in a free-body diagram of one object.", equation:""},
+      {category:"tips", tag:"Tip: FBD", question:"What is a common free-body diagram mistake?", title:"Do not draw forces the object exerts", body:"Only draw forces acting on the object of interest. For example, draw Earth’s gravitational force on the object, not the object’s gravitational force on Earth.", equation:""},
+      {category:"tips", tag:"Misconception: Friction", question:"Is friction always equal to μFN?", title:"Static friction adjusts", body:"No. Static friction can vary up to a maximum value. Dynamic friction is often modelled as μdFN.", equation:"Ff ≤ μsFN, but Ff = μdFN"},
+      {category:"tips", tag:"Tip: Momentum", question:"What should be checked before applying conservation of momentum?", title:"Define the system", body:"Momentum is conserved only for a defined system with no resultant external force, or when external forces are negligible during the interaction.", equation:"external impulse ≈ 0"},
+      {category:"tips", tag:"Misconception: Collisions", question:"Is kinetic energy conserved in every collision?", title:"Momentum yes, kinetic energy not always", body:"Momentum is conserved in isolated collisions. Kinetic energy is conserved only in elastic collisions.", equation:""},
+      {category:"tips", tag:"Misconception: Circular motion", question:"Is centripetal force an extra force added to a free-body diagram?", title:"Centripetal force is resultant inward force", body:"No. It is the name for the resultant force towards the centre, not an additional force type.", equation:"ΣF_radial = mv²/r"},
+      {category:"tips", tag:"Tip: Circular motion", question:"Why is no work done by the centripetal force in uniform circular motion?", title:"Force perpendicular to velocity", body:"The centripetal force is perpendicular to the instantaneous displacement, so it changes direction of velocity but not speed.", equation:"W = Fs cos90° = 0"},
+      {category:"tips", tag:"Misconception: Work", question:"If a force is applied, is work always done?", title:"Force alone is not enough", body:"Work is done only if there is displacement with a component in the direction of the force.", equation:"W = Fs cosθ"},
+      {category:"tips", tag:"Tip: Energy", question:"When is energy often easier than SUVAT?", title:"Use energy for speed-height problems", body:"If time is not needed and friction is negligible, conservation of mechanical energy can be faster than kinematic equations.", equation:"loss in Ep = gain in Ek"},
+      {category:"tips", tag:"Misconception: Energy", question:"Is energy lost when friction acts?", title:"Energy is transferred, not destroyed", body:"Energy is not lost overall; it is transferred to thermal energy and internal energy of the system and surroundings.", equation:""},
+      {category:"tips", tag:"Tip: Power", question:"How can students distinguish energy and power?", title:"Energy vs power", body:"Energy is the amount transferred. Power is how quickly it is transferred.", equation:"P = E/t"},
+      {category:"tips", tag:"Misconception: Efficiency", question:"Can efficiency be greater than 100%?", title:"Efficiency limit", body:"No. Useful output cannot exceed total input. Values above 100% usually indicate an error in system definition or calculation.", equation:"η ≤ 1"},
+      {category:"tips", tag:"Misconception: Torque", question:"Does a larger force always produce a larger torque?", title:"Distance and angle matter", body:"Not necessarily. Torque depends on force, perpendicular distance from the axis, and angle between force and radius.", equation:"τ = Fr sinθ"},
+      {category:"tips", tag:"Tip: Rotation", question:"What is the rotational equivalent of mass?", title:"Moment of inertia", body:"Moment of inertia plays a similar role in rotation as mass does in linear motion, but it also depends on mass distribution.", equation:"F = ma ↔ τ = Iα"},
+      {category:"tips", tag:"Misconception: Angular momentum", question:"If moment of inertia decreases, what happens to angular velocity when angular momentum is conserved?", title:"Angular speed increases", body:"If no external torque acts, L = Iω stays constant. Decreasing I causes ω to increase.", equation:"I↓ → ω↑"},
+      {category:"tips", tag:"Tip: Rotation", question:"How are linear and angular kinematics connected?", title:"Look for analogies", body:"Many rotational equations mirror linear equations: displacement becomes angular displacement, velocity becomes angular velocity, and acceleration becomes angular acceleration.", equation:"s ↔ θ, v ↔ ω, a ↔ α"},
+      {category:"tips", tag:"Misconception: Relativity", question:"Does special relativity say everything is relative?", title:"Some quantities are invariant", body:"No. Some quantities, such as the speed of light in vacuum and the spacetime interval, are invariant for all inertial observers.", equation:"c = constant"},
+      {category:"tips", tag:"Tip: Relativity", question:"What is proper time?", title:"Proper time", body:"Proper time is measured in the frame where the two events occur at the same position. It is the shortest measured time interval.", equation:"Δt = γΔt₀"},
+      {category:"tips", tag:"Misconception: Relativity", question:"Does length contraction affect all dimensions equally?", title:"Only along direction of motion", body:"Length contraction occurs only along the direction of relative motion, not perpendicular to it.", equation:"L = L₀/γ"},
+      {category:"tips", tag:"Tip: Relativity", question:"Why do muons provide evidence for relativity?", title:"Muon decay evidence", body:"More muons reach Earth’s surface than classical physics predicts because, from Earth’s frame, their lifetime is dilated; from the muon frame, the atmosphere is length-contracted.", equation:""},
+
+      // ADDED DEFINITIONS — ROTATION
+      {category:"rotation", tag:"Definition", question:"What is the line of action of a force?", title:"Line of action", body:"A line through the point of action of a force showing the direction in which the force is applied.", equation:""},
+      {category:"rotation", tag:"Definition", question:"What is the moment of a force?", title:"Moment of a force", body:"Moment is a term sometimes used as an alternative to torque, especially when rotation is incomplete.", equation:"moment = force × perpendicular distance"},
+      {category:"rotation", tag:"Definition", question:"What is the principle of moments?", title:"Principle of moments", body:"If an object is in rotational equilibrium, the sum of clockwise moments equals the sum of anticlockwise moments.", equation:"Στ_clockwise = Στ_anticlockwise"},
+      {category:"rotation", tag:"Definition", question:"What is a pivot?", title:"Pivot", body:"A fixed point that supports something which turns or balances.", equation:""},
+      {category:"rotation", tag:"Definition", question:"What is a couple?", title:"Couple", body:"A pair of equal-sized parallel forces acting in opposite directions along different lines of action, tending to cause rotation.", equation:""},
+      {category:"rotation", tag:"Definition", question:"How is angular acceleration related to linear acceleration?", title:"Angular and linear acceleration", body:"For a point on the circumference of a rotating object, angular acceleration is linear acceleration divided by radius.", equation:"α = a / r"},
+      {category:"rotation", tag:"Definition", question:"What is the moment of inertia of a point mass?", title:"Point mass moment of inertia", body:"For a point mass, moment of inertia equals mass multiplied by the square of its distance from the axis.", equation:"I = mr²"},
+      {category:"rotation", tag:"Definition", question:"What is a flywheel?", title:"Flywheel", body:"A dense cylindrical mass with a high moment of inertia, used to resist changes in motion or store rotational kinetic energy.", equation:""},
+      {category:"rotation", tag:"Equation", question:"What is Newton’s second law for angular motion?", title:"Angular form of Newton’s second law", body:"The resultant torque equals moment of inertia multiplied by angular acceleration.", equation:"τ = Iα"},
+      {category:"rotation", tag:"Definition", question:"What is inverse proportionality?", title:"Inverse proportionality", body:"Two quantities are inversely proportional if increasing one by a factor causes the other to decrease by the same factor.", equation:"y ∝ 1/x"},
+      {category:"rotation", tag:"Definition", question:"What is slipping for a wheel?", title:"Slipping", body:"Slipping occurs when there is not enough friction between a wheel and the surface to maintain pure rolling motion.", equation:""},
+      {category:"rotation", tag:"Definition", question:"What is sliding?", title:"Sliding", body:"Sliding occurs when surfaces move over each other without rotation being involved.", equation:""},
+      {category:"rotation", tag:"Definition", question:"What is rolling?", title:"Rolling", body:"Rolling is rotation along a surface where the lowest point of the object is instantaneously stationary. It requires friction.", equation:""},
+
+      // ADDED DEFINITIONS — RELATIVITY
+      {category:"relativity", tag:"Definition", question:"What is relativistic motion?", title:"Relativistic motion", body:"Motion at a significant fraction of the speed of light.", equation:"v ≈ significant fraction of c"},
+      {category:"relativity", tag:"Definition", question:"What is a coordinate system?", title:"Coordinate system", body:"An agreed numerical way of identifying the location and time of an event.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is an event in relativity?", title:"Event", body:"A single incident that occurs at a precise location and time.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is an observer in relativity?", title:"Observer", body:"A real or hypothetical person, or instrument, able to record information about events.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is a postulate?", title:"Postulate", body:"An assumption accepted as true and used as a starting point for further reasoning. It is similar to an axiom.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is an axiom?", title:"Axiom", body:"An unproven assumption accepted as true and used as a starting point for further discussion.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What are simultaneous events?", title:"Simultaneous events", body:"Events that occur at the same time in a specific reference frame. Events simultaneous in one frame may not be simultaneous in another.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is a velocity addition equation?", title:"Velocity addition", body:"An equation connecting the velocities of the same object as observed in two different reference frames.", equation:"u′ = u − v"},
+      {category:"relativity", tag:"Definition", question:"What was the Michelson–Morley experiment?", title:"Michelson–Morley experiment", body:"An experiment designed to measure Earth’s speed through the ether. Its null result contributed to the abandonment of the ether idea and the development of special relativity.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What was the ether or aether?", title:"Ether / aether", body:"A hypothetical substance once proposed as the medium through which electromagnetic waves travelled. The idea was later rejected.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is special relativity?", title:"Special relativity", body:"Einstein’s theory connecting space and time in inertial reference frames, leading to time dilation, length contraction and mass–energy equivalence.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is an invariant quantity?", title:"Invariant quantity", body:"A quantity with the same value in all reference frames. Examples include the speed of light in vacuum, spacetime interval, proper time, proper length, rest mass and electric charge.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is spacetime?", title:"Spacetime", body:"The combination of space and time into a single entity. In relativity, space and time are not independent of one another.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is a paradigm?", title:"Paradigm", body:"The set of concepts and practices that characterize an area of knowledge at a particular time. A major change is called a paradigm shift.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is a Lorentz transformation?", title:"Lorentz transformation", body:"Equations involving the Lorentz factor used to calculate position and time coordinates when moving between relativistic reference frames.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is a light-year?", title:"Light-year", body:"A unit of distance equal to the distance travelled by light in vacuum in one year.", equation:"1 ly = distance light travels in 1 year"},
+      {category:"relativity", tag:"Definition", question:"What is an inertial observer?", title:"Inertial observer", body:"An observer who is neither accelerating nor experiencing a gravitational field.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What does spatial mean?", title:"Spatial", body:"Spatial means related to the dimensions of space. A spatial interval is a length in space.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What does temporal mean?", title:"Temporal", body:"Temporal means related to time. A temporal interval is a time interval.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What does synchronized mean?", title:"Synchronized clocks", body:"Two clocks are synchronized if, according to an observer, they read the same time.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is the twin paradox?", title:"Twin paradox", body:"A thought experiment where one twin travels at high speed and returns younger than the twin who remained on Earth. The apparent contradiction is resolved because the travelling twin changes frames.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is proper time interval?", title:"Proper time interval", body:"The time interval between two events measured by an observer who records both events at the same point in space. It is the shortest measured time interval.", equation:"Δt₀"},
+      {category:"relativity", tag:"Equation", question:"What is the time dilation formula?", title:"Time dilation formula", body:"The observed time interval equals the Lorentz factor multiplied by the proper time interval.", equation:"Δt = γΔt₀"},
+      {category:"relativity", tag:"Definition", question:"What is proper length?", title:"Proper length", body:"The length measured by an observer at rest relative to the object being measured. It is the longest measurable length.", equation:"L₀"},
+      {category:"relativity", tag:"Equation", question:"What is the length contraction formula?", title:"Length contraction formula", body:"The measured length equals the proper length divided by the Lorentz factor.", equation:"L = L₀ / γ"},
+      {category:"relativity", tag:"Definition", question:"What is the muon decay experiment?", title:"Muon decay experiment", body:"An experiment supporting time dilation and length contraction by comparing high-energy muon levels in the upper atmosphere and at Earth’s surface.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is a muon?", title:"Muon", body:"An unstable elementary subatomic particle.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is radioactive half-life?", title:"Half-life", body:"The time taken for the number of unstable particles in a sample to reduce to half.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is radioactive decay?", title:"Radioactive decay", body:"A spontaneous and random change of an unstable particle.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is classical physics?", title:"Classical physics", body:"Physics theories that came before the paradigm shifts introduced by relativity and quantum physics.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What are spacetime diagrams?", title:"Spacetime diagrams", body:"Graphs showing how objects’ positions vary with time, adapted to compare different frames of reference.", equation:""},
+      {category:"relativity", tag:"Definition", question:"What is the spacetime interval?", title:"Spacetime interval", body:"A quantity combining the spatial and temporal separation between events into a single value.", equation:"(Δs)² = (cΔt)² − (Δx)²"},
+      {category:"relativity", tag:"Definition", question:"What is a world line?", title:"World line", body:"The path an object traces on a spacetime diagram.", equation:""}
+    ];
+
+    let filteredCards = [...cards];
+    let currentIndex = 0;
+    let knownCards = new Set();
+
+    const flashcard = document.getElementById("flashcard");
+    const questionText = document.getElementById("questionText");
+    const answerTitle = document.getElementById("answerTitle");
+    const answerBody = document.getElementById("answerBody");
+    const equationBox = document.getElementById("equationBox");
+    const frontTag = document.getElementById("frontTag");
+    const backTag = document.getElementById("backTag");
+    const cardCounter = document.getElementById("cardCounter");
+    const knownScore = document.getElementById("knownScore");
+    const totalScore = document.getElementById("totalScore");
+    const progressBar = document.getElementById("progressBar");
+    const categoryFilter = document.getElementById("categoryFilter");
+
+    function cardId(card) {
+      return card.question + "|" + card.title;
+    }
+
+    function renderCard() {
+      if (!filteredCards.length) {
+        questionText.textContent = "No cards available.";
+        answerTitle.textContent = "Try another filter";
+        answerBody.textContent = "Choose a different category to continue practising.";
+        equationBox.textContent = "";
+        cardCounter.textContent = "Card 0 of 0";
+        return;
+      }
+
+      const card = filteredCards[currentIndex];
+      flashcard.classList.remove("flipped");
+      frontTag.textContent = card.tag;
+      backTag.textContent = card.tag;
+      questionText.textContent = card.question;
+      answerTitle.textContent = card.title;
+      answerBody.textContent = card.body;
+      equationBox.textContent = card.equation || "";
+      equationBox.style.display = card.equation ? "block" : "none";
+      cardCounter.textContent = `Card ${currentIndex + 1} of ${filteredCards.length}`;
+      updateScore();
+    }
+
+    function updateScore() {
+      const visibleKnown = filteredCards.filter(card => knownCards.has(cardId(card))).length;
+      knownScore.textContent = visibleKnown;
+      totalScore.textContent = `/ ${filteredCards.length}`;
+      const progress = filteredCards.length ? (visibleKnown / filteredCards.length) * 100 : 0;
+      progressBar.style.width = `${progress}%`;
+    }
+
+    function nextCard() {
+      if (!filteredCards.length) return;
+      currentIndex = (currentIndex + 1) % filteredCards.length;
+      renderCard();
+    }
+
+    function previousCard() {
+      if (!filteredCards.length) return;
+      currentIndex = (currentIndex - 1 + filteredCards.length) % filteredCards.length;
+      renderCard();
+    }
+
+    function shuffleCards() {
+      filteredCards.sort(() => Math.random() - 0.5);
+      currentIndex = 0;
+      renderCard();
+    }
+
+    function applyFilter() {
+      const category = categoryFilter.value;
+      filteredCards = category === "all" ? [...cards] : cards.filter(card => card.category === category);
+      currentIndex = 0;
+      renderCard();
+    }
+
+    flashcard.addEventListener("click", () => flashcard.classList.toggle("flipped"));
+
+    flashcard.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        flashcard.classList.toggle("flipped");
+      }
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", nextCard);
+    document.getElementById("prevBtn").addEventListener("click", previousCard);
+    document.getElementById("shuffleBtn").addEventListener("click", shuffleCards);
+    document.getElementById("categoryFilter").addEventListener("change", applyFilter);
+
+    document.getElementById("knownBtn").addEventListener("click", () => {
+      if (!filteredCards.length) return;
+      knownCards.add(cardId(filteredCards[currentIndex]));
+      updateScore();
+      nextCard();
+    });
+
+    document.getElementById("reviewBtn").addEventListener("click", () => {
+      if (!filteredCards.length) return;
+      knownCards.delete(cardId(filteredCards[currentIndex]));
+      updateScore();
+      nextCard();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      knownCards.clear();
+      currentIndex = 0;
+      renderCard();
+    });
+
+    renderCard();
+  </script>
+</body>
+</html>
